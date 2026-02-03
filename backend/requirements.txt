@@ -1,0 +1,30 @@
+# MyTrainUp Backend: Dipendenze del Progetto (Dependencies)
+
+# Questo file (requirements.txt) elenca tutte le librerie Python e le loro versioni
+# specifiche necessarie per l'esecuzione corretta del backend dell'applicazione FitPlanner.
+
+# Librerie chiave incluse:
+# - Flask (il framework web principale).
+# - flask-cors (per gestire le politiche Cross-Origin Resource Sharing).
+# - Flask-SQLAlchemy (per l'interazione con il database tramite un ORM, anche se il progetto usa SQLite diretto).
+# - PyJWT (per la gestione dei JSON Web Tokens, essenziale per l'autenticazione).
+# - python-dotenv (per caricare le variabili d'ambiente dal file .env).
+# - gunicorn (il server WSGI utilizzato per l'esecuzione in produzione).
+
+# La presenza di questo file assicura la replicabilità dell'ambiente di sviluppo e di produzione.
+
+blinker==1.9.0
+click==8.3.1
+Flask==3.1.2
+flask-cors==6.0.1
+Flask-SQLAlchemy==3.1.1
+greenlet==3.2.4
+itsdangerous==2.2.0
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+PyJWT==2.10.1
+python-dotenv==1.2.1
+SQLAlchemy==2.0.44
+typing_extensions==4.15.0
+Werkzeug==3.1.3
+gunicorn

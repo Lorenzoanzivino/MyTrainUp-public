@@ -1,0 +1,16 @@
+/* MyTrainUp Frontend: Fogli di Stile Principali (Tailwind CSS) */
+
+/* Questo file (index.css) è il foglio di stile principale che importa le direttive base
+- di Tailwind CSS, costituendo il punto di iniezione di tutti gli stili del progetto. */
+
+/* Funzioni chiave:
+- @tailwind base: Inietta gli stili di base (reset CSS, preflight) forniti da Tailwind.
+- @tailwind components: Inietta gli stili per i componenti di utilità predefiniti e custom (se usati).
+- @tailwind utilities: Inietta tutte le classi di utilità di Tailwind (es. `flex`, `p-4`, `bg-red-500`)
+- che vengono poi compilate e ottimizzate dal processo di build. */
+
+/* Questo approccio garantisce che solo il CSS necessario venga incluso nel bundle finale. */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

@@ -1,0 +1,38 @@
+# --- SISTEMA E IDE ---
+.DS_Store
+.vscode/
+.idea/
+
+# --- PYTHON & BACKEND ---
+__pycache__/
+*.py[cod]
+*$py.class
+backend/venv/
+backend/instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# --- BACKUP E DATI SENSIBILI (IMPORTANTE) ---
+*backup*.db
+*_GINEVRA.db
+*_JSON.db
+backend/static/uploads/
+
+# --- NODE & FRONTEND ---
+node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# --- CONFIGURAZIONI SEGRETE ---
+.env
+backend/.env
+deploy.sh  # Consiglio di ignorarlo o pulirlo (vedi Step 3)
+
+# --- DOCUMENTAZIONE ---
+*repomix-backend.md 
+*repomix-frontend.md 
+*struttura-progetto.txt
+*repomix*
+*ComandoPerUpload.txt
