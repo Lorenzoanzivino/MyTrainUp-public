@@ -6,7 +6,7 @@ MyTrainUp è una soluzione Full-Stack professionale progettata per digitalizzare
 
 ## Badge Tecnologici
 
-[![Tech Stack](https://img.shields.io/badge/Stack-React--Flask-blue)](https://github.com/Lorenzoanzivino/MyTrainUp)
+[![Tech Stack](https://img.shields.io/badge/Stack-React--Flask-blue)](https://github.com/Lorenzoanzivino/MyTrainUp-public)
 [![Database](https://img.shields.io/badge/Database-SQLite-003B57)](https://www.sqlite.org/)
 [![Auth](https://img.shields.io/badge/Auth-JWT-black)](https://jwt.io/)
 [![Frontend](https://img.shields.io/badge/Frontend-Vite%20%2B%20Tailwind-646CFF)](https://vitejs.dev/)
