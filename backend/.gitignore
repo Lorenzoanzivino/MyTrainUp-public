@@ -1,0 +1,17 @@
+# MyTrainUp Backend: Regole di Ignorazione dei File (Git Ignore)
+
+# Questo file (.gitignore) istruisce il sistema di controllo versione Git su quali file e directory ignorare e non tracciare all'interno del repository del progetto.
+
+# File e directory ignorati (critici per il deploy e la sicurezza):
+# 1. venv/: L'ambiente virtuale Python, contenente le librerie specifiche del progetto.
+# 2. __pycache__/: Cache di Python generate automaticamente.
+# 3. *.pyc: File bytecode compilati.
+# 4. fitplanner.db: Il file del database SQLite. Questo assicura che i dati di produzione non vengano caricati
+# - involontariamente nel repository o sovrascritti durante lo sviluppo.
+# 5. .env: Il file di configurazione contenente chiavi segrete e credenziali sensibili (FONDAMENTALE per la sicurezza).
+
+venv/
+__pycache__/
+*.pyc
+fitplanner.db
+.env  <--- FONDAMENTALE!
