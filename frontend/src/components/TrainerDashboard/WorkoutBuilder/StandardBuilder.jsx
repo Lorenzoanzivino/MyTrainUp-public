@@ -2,7 +2,7 @@
 /**
  * TITOLO: Standard Workout Builder (JSON Enterprise Edition)
  * DESCRIZIONE: Orchestratore per la creazione di schede con supporto nativo JSON.
- * LOGICA: Gestione atomica dei set e ordinamento manuale per supporto Mobile.
+ * LOGICA: Gestione atomica dei set come oggetti indipendenti.
  */
 
 import React, { useState, useEffect } from "react";
@@ -43,9 +43,6 @@ import ExerciseItem from "./ExerciseItem";
 const SortableItem = ({
   ex,
   exIdx,
-  totalExercises,
-  onMoveUp,
-  onMoveDown,
   onUpdateName,
   onRemove,
   onAddSet,
@@ -72,16 +69,13 @@ const SortableItem = ({
     <div ref={setNodeRef} style={style} {...attributes} className="relative">
       <div
         {...listeners}
-        className="absolute -left-8 top-1/2 transform -translate-y-1/2 p-2 cursor-grab text-slate-400 hover:text-white transition-colors z-10 hidden sm:block"
+        className="absolute -left-8 top-1/2 transform -translate-y-1/2 p-2 cursor-grab text-slate-400 hover:text-white transition-colors z-10"
       >
         <GripVertical size={24} />
       </div>
       <ExerciseItem
         ex={ex}
         exIdx={exIdx}
-        totalExercises={totalExercises}
-        onMoveUp={onMoveUp}
-        onMoveDown={onMoveDown}
         onUpdateName={onUpdateName}
         onRemove={onRemove}
         onAddSet={onAddSet}
@@ -137,8 +131,6 @@ export default function StandardBuilder({
   }, [workoutToEdit]);
 
   // --- LOGICA AZIONI ESERCIZI ---
-
-  // Drag & Drop Nativo (per Desktop)
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -149,25 +141,6 @@ export default function StandardBuilder({
       const newList = [...items];
       const [removed] = newList.splice(oldIndex, 1);
       newList.splice(newIndex, 0, removed);
-      return newList;
-    });
-  };
-
-  // Spostamento Manuale (per Mobile)
-  const moveExercise = (index, direction) => {
-    setExercises((items) => {
-      const newList = [...items];
-      if (direction === "up" && index > 0) {
-        [newList[index - 1], newList[index]] = [
-          newList[index],
-          newList[index - 1],
-        ];
-      } else if (direction === "down" && index < newList.length - 1) {
-        [newList[index + 1], newList[index]] = [
-          newList[index],
-          newList[index + 1],
-        ];
-      }
       return newList;
     });
   };
@@ -208,7 +181,7 @@ export default function StandardBuilder({
   const handleSave = async (saveAsNew = false) => {
     if (!title || !selectedFolder || exercises.length === 0)
       return alert(
-        "Compila tutti i campi obbligatori (Titolo, Cartella, Esercizi)",
+        "Compila tutti i campi obbligatori (Titolo, Cartella, Esercizi)"
       );
 
     // TRASFORMAZIONE: Convertiamo lo stato locale nel formato 'config' per il Backend
@@ -311,9 +284,6 @@ export default function StandardBuilder({
                 key={ex.id}
                 ex={ex}
                 exIdx={exIdx}
-                totalExercises={exercises.length}
-                onMoveUp={() => moveExercise(exIdx, "up")}
-                onMoveDown={() => moveExercise(exIdx, "down")}
                 onUpdateName={(idx, f, v) => {
                   const n = [...exercises];
                   n[idx][f] = v;

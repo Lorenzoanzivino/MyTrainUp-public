@@ -2,7 +2,7 @@
 /**
  * TITOLO: Exercise Mapper (Source of Truth - JSON Enterprise)
  * DESCRIZIONE: Gestisce la trasformazione dei dati tra Database e UI.
- * MODIFICHE: Integrazione supporto nativo per link YouTube.
+ * MODIFICHE: Supporto alle note per esercizi singoli e nidificati (circuiti).
  */
 import { splitMainString } from "./exerciseParser";
 
@@ -21,9 +21,10 @@ export const mapExerciseToUI = (ex) => {
       reps: s.reps || "",
       kg: s.kg || "",
       rest: s.rest || "",
-      // Recuperiamo la nota tecnica (trainer_notes) o quella di set (note)
+      // MODIFICA: Recuperiamo la nota tecnica (trainer_notes) o quella di set (note)
+      // Per i circuiti, la nota dell'esercizio è salvata come 'notes' o 'trainer_notes' nel JSON
       notes: s.notes || s.trainer_notes || "",
-      note: s.note || "", // Nota specifica del set
+      note: s.note || "", // Nota specifica del set (es. "fino a cedimento")
       type: s.type || "normal",
       // Campi specifici per modalità timer nei circuiti
       mode: s.mode || "reps",
@@ -60,15 +61,11 @@ export const mapExerciseToUI = (ex) => {
     exercise_order: ex.exercise_order || 0,
     config: finalSets,
     sets: finalSets, // Alias per compatibilità
-
     // Note globali (per esercizi standard)
     trainer_notes: ex.trainer_notes || "",
     client_notes: ex.client_notes || "",
     // Campo 'notes' usato dalla UI come standard unico
     notes: ex.trainer_notes || "",
-
-    // Integrazione Link YouTube (a livello di intero esercizio)
-    youtube_link: ex.youtube_link || "",
   };
 };
 
@@ -106,11 +103,7 @@ export const mapUIToExercise = (uiEx, orderIndex) => {
     second_name: uiEx.second_name || "",
     exercise_type: uiEx.exercise_type || "normal",
     exercise_order: orderIndex,
-
-    // Integrazione Link YouTube per il salvataggio nel DB
-    youtube_link: uiEx.youtube_link || "",
-
-    // Includiamo 'notes' nella configurazione JSON dei set/esercizi circuiti
+    // MODIFICA: Includiamo 'notes' nella configurazione JSON dei set/esercizi circuiti
     config: uiEx.sets.map((s) => ({
       name: s.name || "",
       reps: s.reps,
@@ -121,7 +114,7 @@ export const mapUIToExercise = (uiEx, orderIndex) => {
       workTime: s.workTime || "",
       restTime: s.restTime || "",
       note: s.note || "", // Nota di set
-      notes: s.notes || "", // NOTA TECNICA
+      notes: s.notes || "", // NOTA TECNICA (quella della textarea nel builder)
     })),
     trainer_notes: uiEx.trainer_notes || uiEx.notes || "",
     client_notes: uiEx.client_notes || "",

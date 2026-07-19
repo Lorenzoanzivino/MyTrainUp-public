@@ -1,11 +1,10 @@
-// ! frontend/src/components/shared/SetRow.jsx
 /**
  * TITOLO: Set Row Component (Controlled & Aligned Edition)
  * DESCRIZIONE: Componente per la modifica delle singole righe nel builder.
- * FIX: Debouncing locale anti-latenza e textarea flessibile per le note.
+ * FIX: Fallback values per prevenire warning React, ottimizzazione griglia per mobile.
  */
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Trash2, FileText, Timer } from "lucide-react";
 
 const TYPE_CONFIG = {
@@ -31,24 +30,6 @@ export default function SetRow({
 }) {
   const config = TYPE_CONFIG[type] || TYPE_CONFIG.normal;
   const color = config.color;
-
-  // STATI LOCALI PER ANTI-LATENZA (Debouncing)
-  const [localReps, setLocalReps] = useState(reps || "");
-  const [localKg, setLocalKg] = useState(kg || "");
-  const [localRest, setLocalRest] = useState(rest || "");
-  const [localNote, setLocalNote] = useState(note || "");
-
-  // Sincronizzazione stati locali se le props cambiano dall'esterno
-  useEffect(() => setLocalReps(reps || ""), [reps]);
-  useEffect(() => setLocalKg(kg || ""), [kg]);
-  useEffect(() => setLocalRest(rest || ""), [rest]);
-  useEffect(() => setLocalNote(note || ""), [note]);
-
-  const handleBlur = (field, localValue, propValue) => {
-    if (localValue !== (propValue || "")) {
-      onFieldChange(field, localValue);
-    }
-  };
 
   return (
     <div
@@ -80,9 +61,8 @@ export default function SetRow({
             type="text"
             disabled={isReadOnly}
             className={`w-full text-center p-2 border border-slate-600 rounded-lg text-sm bg-slate-800 text-white focus:border-${color}-500 outline-none`}
-            value={localReps}
-            onChange={(e) => setLocalReps(e.target.value)}
-            onBlur={() => handleBlur("reps", localReps, reps)}
+            value={reps || ""} // FIX: Fallback per input controllato
+            onChange={(e) => onFieldChange("reps", e.target.value)}
             placeholder="10"
           />
         </div>
@@ -96,14 +76,13 @@ export default function SetRow({
             type="text"
             disabled={isReadOnly}
             className={`w-full text-center p-2 border border-slate-600 rounded-lg text-sm bg-slate-800 text-white focus:border-${color}-500 outline-none`}
-            value={localKg}
-            onChange={(e) => setLocalKg(e.target.value)}
-            onBlur={() => handleBlur("kg", localKg, kg)}
+            value={kg || ""} // FIX: Fallback per input controllato
+            onChange={(e) => onFieldChange("kg", e.target.value)}
             placeholder="50"
           />
         </div>
 
-        {/* RECUPERO */}
+        {/* RECUPERO (Sempre visibile per permettere timer indipendenti) */}
         <div className="col-span-4">
           <div className="flex items-center gap-1 mb-1">
             <Timer size={10} className="text-slate-500" />
@@ -117,15 +96,14 @@ export default function SetRow({
             className={`w-full text-center p-2 border border-slate-600 rounded-lg text-sm bg-slate-800 text-white focus:border-${color}-500 outline-none ${
               isRestDisabled ? "opacity-30" : ""
             }`}
-            value={localRest}
-            onChange={(e) => setLocalRest(e.target.value)}
-            onBlur={() => handleBlur("rest", localRest, rest)}
+            value={rest || ""} // FIX: Fallback per input controllato
+            onChange={(e) => onFieldChange("rest", e.target.value)}
             placeholder="90"
           />
         </div>
       </div>
 
-      {/* Note Trainer - TRASFORMATO IN TEXTAREA FLESSIBILE */}
+      {/* Note Trainer */}
       <div className="pt-1">
         <span className="text-[8px] sm:text-[10px] text-slate-500 block uppercase mb-1">
           Note per Cliente
@@ -133,21 +111,20 @@ export default function SetRow({
         <div className="relative">
           <FileText
             size={14}
-            className="absolute left-2.5 top-3 text-slate-500"
+            className="absolute left-2 top-2.5 text-slate-500"
           />
-          <textarea
+          <input
+            type="text"
             disabled={isReadOnly}
-            className={`w-full pl-8 p-2 border border-slate-600 rounded-lg text-sm bg-slate-800 text-white focus:border-${color}-500 outline-none min-h-[42px] resize-y overflow-hidden leading-tight`}
-            value={localNote}
-            onChange={(e) => setLocalNote(e.target.value)}
-            onBlur={() => handleBlur("note", localNote, note)}
-            placeholder="Esempio: Esplosivo nella fase concentrica... (Premi Invio per andare a capo)"
-            rows={1}
+            className={`w-full pl-7 p-2 border border-slate-600 rounded-lg text-sm bg-slate-800 text-white focus:border-${color}-500 outline-none`}
+            value={note || ""} // FIX: Fallback per input controllato
+            onChange={(e) => onFieldChange("note", e.target.value)}
+            placeholder="Esempio: Esplosivo nella fase concentrica..."
           />
         </div>
       </div>
 
-      {/* Pulsante Rimuovi */}
+      {/* Pulsante Rimuovi: Solo per la prima riga se non in superset */}
       {!isReadOnly && showRemove && (
         <div className="flex justify-end pt-1">
           <button

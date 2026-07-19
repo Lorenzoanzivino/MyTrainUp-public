@@ -1,4 +1,4 @@
-# ! backend/routes/workouts.py
+# backend/routes/workouts.py
 import json
 from flask import Blueprint, request, jsonify
 from db import get_db_connection, create_notification, validate_json_data
@@ -26,6 +26,7 @@ def get_workouts(current_user, folder_id=None):
         filters.append("is_visible = 1")
 
     # 2. Filtro Cartella (Ora applicabile a TUTTI, anche ai clienti)
+    # FIX: Sostituito elif con if separato per permettere il filtro combinato
     if f_id:
         filters.append("folder_id = ?")
         params.append(f_id)
@@ -41,9 +42,9 @@ def get_workouts(current_user, folder_id=None):
         result = []
         for w in workouts:
             w_dict = dict(w)
-            # Recupero esercizi ordinati con youtube_link
+            # Recupero esercizi ordinati
             exercises = conn.execute(
-                "SELECT id, name, second_name, exercise_type, config_json, trainer_notes, client_notes, exercise_order, youtube_link "
+                "SELECT id, name, second_name, exercise_type, config_json, trainer_notes, client_notes, exercise_order "
                 "FROM exercises WHERE workout_id = ? ORDER BY exercise_order",
                 (w["id"],),
             ).fetchall()
@@ -65,9 +66,8 @@ def get_workouts(current_user, folder_id=None):
                 if "config_json" in ex_dict:
                     del ex_dict["config_json"]
 
-                # Gestione sicura delle note e link youtube
+                # Gestione sicura delle note
                 ex_dict["notes"] = ex_dict.get("trainer_notes") or ""
-                ex_dict["youtube_link"] = ex_dict.get("youtube_link") or ""
 
                 w_dict["exercises"].append(ex_dict)
             result.append(w_dict)
@@ -150,20 +150,19 @@ def create_workout(current_user):
         for i, ex in enumerate(data.get("exercises", [])):
             config_data = ex.get("config", [])
 
-            # Validazione schema JSON
+            # Validazione schema JSON (Permette campi extra come 'note')
             if not validate_json_data(config_data, ["reps", "kg", "rest", "type"]):
                 raise ValueError(f"Formato set non valido per: {ex['name']}")
 
             config_json_str = json.dumps(config_data)
 
-            # Estrapolazione sicura dei valori testuali
+            # FIX SALVATAGGIO: Gestiamo anche qui il None per sicurezza
             notes_value = ex.get("notes") or ex.get("trainer_notes") or ""
-            youtube_val = ex.get("youtube_link") or ""
 
             conn.execute(
                 """
-                INSERT INTO exercises (workout_id, name, second_name, exercise_type, config_json, trainer_notes, client_notes, exercise_order, youtube_link)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO exercises (workout_id, name, second_name, exercise_type, config_json, trainer_notes, client_notes, exercise_order)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     workout_id,
@@ -174,7 +173,6 @@ def create_workout(current_user):
                     notes_value,
                     ex.get("client_notes", ""),
                     i,
-                    youtube_val,
                 ),
             )
 

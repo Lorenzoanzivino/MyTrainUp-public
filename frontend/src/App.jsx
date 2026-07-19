@@ -1,4 +1,3 @@
-// ! frontend/src/App.jsx
 import React, { useState } from "react";
 import {
   BrowserRouter,
@@ -22,8 +21,6 @@ import LoginForm from "./components/LoginForm";
 import TrainerPage from "./pages/TrainerPage";
 import PersonalAreaPage from "./pages/PersonalAreaPage";
 import ClientSchedulerPage from "./pages/ClientSchedulerPage";
-
-import VersionChecker from "./components/VersionChecker";
 
 function LoginLayout() {
   return (
@@ -67,7 +64,6 @@ export default function App() {
       {" "}
       {/* <-- AVVOLGE TUTTO */}
       <BrowserRouter>
-        <VersionChecker />
         <NavigationProvider>
           <Routes>
             <Route element={<RootLayout />}>

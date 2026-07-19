@@ -1,4 +1,3 @@
-# ! backend/db.py
 import sqlite3
 import json
 import hashlib
@@ -37,9 +36,6 @@ def validate_json_data(data, schema_keys):
 def create_notification(
     recipient_id, sender_id, notification_type, message, resource_id=None, conn=None
 ):
-    """
-    Gestisce la creazione di notifiche nel database.
-    """
     close_conn = False
     if conn is None:
         conn = get_db_connection()
@@ -94,8 +90,7 @@ def init_db():
     conn = get_db_connection()
 
     # 1. UTENTI
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -105,63 +100,137 @@ def init_db():
             role TEXT NOT NULL DEFAULT 'client',
             xp INTEGER DEFAULT 0,
             level INTEGER DEFAULT 1,
-            is_active INTEGER DEFAULT 1,
             chest_progress INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    """
-    )
+    """)
 
     # 2. CARTELLE
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS folders (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, client_id INTEGER, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE)"
-    )
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS folders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            client_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
 
     # 3. SCHEDE (WORKOUTS)
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS workouts (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, cycle_name TEXT, duration_weeks INTEGER DEFAULT 4, folder_id INTEGER, trainer_id INTEGER, client_id INTEGER, rating INTEGER DEFAULT 0, client_comment TEXT, workout_type TEXT DEFAULT 'standard', circuit_rounds INTEGER DEFAULT 0, circuit_rest TEXT DEFAULT '', is_visible INTEGER DEFAULT 1, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (folder_id) REFERENCES folders(id) ON DELETE SET NULL, FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE)"
-    )
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS workouts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            cycle_name TEXT,
+            duration_weeks INTEGER DEFAULT 4,
+            folder_id INTEGER,
+            trainer_id INTEGER,
+            client_id INTEGER,
+            rating INTEGER DEFAULT 0,
+            client_comment TEXT,
+            workout_type TEXT DEFAULT 'standard',
+            circuit_rounds INTEGER DEFAULT 0,
+            circuit_rest TEXT DEFAULT '',
+            is_visible INTEGER DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (folder_id) REFERENCES folders(id) ON DELETE SET NULL,
+            FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
 
-    # 4. ESERCIZI
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS exercises (id INTEGER PRIMARY KEY AUTOINCREMENT, workout_id INTEGER, name TEXT NOT NULL, second_name TEXT, exercise_type TEXT DEFAULT 'normal', config_json TEXT, trainer_notes TEXT, client_notes TEXT, exercise_order INTEGER, youtube_link TEXT, FOREIGN KEY (workout_id) REFERENCES workouts (id) ON DELETE CASCADE)"
-    )
+    # 4. ESERCIZI (Refactor JSON)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS exercises (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            workout_id INTEGER,
+            name TEXT NOT NULL,            
+            second_name TEXT,              
+            exercise_type TEXT DEFAULT 'normal', 
+            config_json TEXT, 
+            trainer_notes TEXT,
+            client_notes TEXT,
+            exercise_order INTEGER,
+            FOREIGN KEY (workout_id) REFERENCES workouts (id) ON DELETE CASCADE
+        )
+    """)
 
-    # 5. LOG SETTIMANALI
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS weekly_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, exercise_id INTEGER, week_number INTEGER, set_index INTEGER, data_json TEXT, is_completed INTEGER DEFAULT 0, notes TEXT, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE CASCADE, UNIQUE(exercise_id, week_number, set_index))"
-    )
+    # 5. LOG SETTIMANALI (Refactor JSON)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS weekly_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            exercise_id INTEGER,
+            week_number INTEGER,
+            set_index INTEGER,
+            data_json TEXT, 
+            is_completed INTEGER DEFAULT 0,
+            notes TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE CASCADE,
+            UNIQUE(exercise_id, week_number, set_index)
+        )
+    """)
 
-    # 6. NOTIFICHE
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, recipient_id INTEGER, sender_id INTEGER, type TEXT, message TEXT, resource_id INTEGER, is_read INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE)"
-    )
+    # 6. ALTRE TABELLE (Sostituiti i (...) con schema reale)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            recipient_id INTEGER,
+            sender_id INTEGER,
+            type TEXT,
+            message TEXT,
+            resource_id INTEGER,
+            is_read INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
 
-    # Altre tabelle di sistema
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS client_schedules (id INTEGER PRIMARY KEY AUTOINCREMENT, client_id INTEGER, folder_id INTEGER, workout_id INTEGER, assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE)"
-    )
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS daily_quests (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT, xp_reward INTEGER, is_completed INTEGER DEFAULT 0)"
-    )
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS workout_completions (id INTEGER PRIMARY KEY AUTOINCREMENT, client_id INTEGER, workout_id INTEGER, completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE)"
-    )
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS client_schedules (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            client_id INTEGER,
+            folder_id INTEGER,
+            workout_id INTEGER,
+            assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
 
-    # --- MIGRAZIONI SOFT (Archivio e Link YouTube) ---
-    migrations = [
-        "ALTER TABLE exercises ADD COLUMN config_json TEXT",
-        "ALTER TABLE weekly_logs ADD COLUMN data_json TEXT",
-        "ALTER TABLE weekly_logs ADD COLUMN is_completed INTEGER DEFAULT 0",
-        "ALTER TABLE exercises ADD COLUMN youtube_link TEXT",
-        "ALTER TABLE users ADD COLUMN is_active INTEGER DEFAULT 1",
-    ]
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS daily_quests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            description TEXT,
+            xp_reward INTEGER,
+            is_completed INTEGER DEFAULT 0
+        )
+    """)
 
-    for m in migrations:
-        try:
-            conn.execute(m)
-        except:
-            pass
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS workout_completions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            client_id INTEGER,
+            workout_id INTEGER,
+            completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+
+    # --- MIGRAZIONI SOFT ---
+    try:
+        conn.execute("ALTER TABLE exercises ADD COLUMN config_json TEXT")
+    except:
+        pass
+    try:
+        conn.execute("ALTER TABLE weekly_logs ADD COLUMN data_json TEXT")
+    except:
+        pass
+    try:
+        conn.execute(
+            "ALTER TABLE weekly_logs ADD COLUMN is_completed INTEGER DEFAULT 0"
+        )
+    except:
+        pass
 
     # Admin Default
     cur = conn.execute("SELECT COUNT(*) as count FROM users WHERE role = 'trainer'")
@@ -169,7 +238,7 @@ def init_db():
         admin_pass = hash_password("admin123")
         conn.execute(
             "INSERT INTO users (name, username, password, role) VALUES (?, ?, ?, ?)",
-            ("Lorenzo Trainer", "lorenzo", admin_pass, "trainer"),
+            ("System Admin", "admin", admin_pass, "trainer"),  # <-- Modificato qui
         )
 
     conn.commit()
