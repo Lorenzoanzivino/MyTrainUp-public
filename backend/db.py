@@ -90,8 +90,7 @@ def init_db():
     conn = get_db_connection()
 
     # 1. UTENTI
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -104,12 +103,10 @@ def init_db():
             chest_progress INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    """
-    )
+    """)
 
     # 2. CARTELLE
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS folders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -117,12 +114,10 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE
         )
-    """
-    )
+    """)
 
     # 3. SCHEDE (WORKOUTS)
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS workouts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
@@ -141,12 +136,10 @@ def init_db():
             FOREIGN KEY (folder_id) REFERENCES folders(id) ON DELETE SET NULL,
             FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE
         )
-    """
-    )
+    """)
 
     # 4. ESERCIZI (Refactor JSON)
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS exercises (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             workout_id INTEGER,
@@ -159,12 +152,10 @@ def init_db():
             exercise_order INTEGER,
             FOREIGN KEY (workout_id) REFERENCES workouts (id) ON DELETE CASCADE
         )
-    """
-    )
+    """)
 
     # 5. LOG SETTIMANALI (Refactor JSON)
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS weekly_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             exercise_id INTEGER,
@@ -177,12 +168,10 @@ def init_db():
             FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE CASCADE,
             UNIQUE(exercise_id, week_number, set_index)
         )
-    """
-    )
+    """)
 
     # 6. ALTRE TABELLE (Sostituiti i (...) con schema reale)
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS notifications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             recipient_id INTEGER,
@@ -194,11 +183,9 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE
         )
-    """
-    )
+    """)
 
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS client_schedules (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             client_id INTEGER,
@@ -207,11 +194,9 @@ def init_db():
             assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE
         )
-    """
-    )
+    """)
 
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS daily_quests (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
@@ -219,11 +204,9 @@ def init_db():
             xp_reward INTEGER,
             is_completed INTEGER DEFAULT 0
         )
-    """
-    )
+    """)
 
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS workout_completions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             client_id INTEGER,
@@ -231,8 +214,7 @@ def init_db():
             completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE
         )
-    """
-    )
+    """)
 
     # --- MIGRAZIONI SOFT ---
     try:
@@ -250,13 +232,13 @@ def init_db():
     except:
         pass
 
-    # Creazione Admin Default
+    # Admin Default
     cur = conn.execute("SELECT COUNT(*) as count FROM users WHERE role = 'trainer'")
     if cur.fetchone()["count"] == 0:
         admin_pass = hash_password("admin123")
         conn.execute(
             "INSERT INTO users (name, username, password, role) VALUES (?, ?, ?, ?)",
-            ("Lorenzo Trainer", "lorenzo", admin_pass, "trainer"),
+            ("System Admin", "admin", admin_pass, "trainer"),  # <-- Modificato qui
         )
 
     conn.commit()
