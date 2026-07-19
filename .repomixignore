@@ -1,0 +1,42 @@
+# --- Documentazione e Patch pesanti ---
+
+# Escludiamo la cartella pdf come richiesto (contiene file di testo enormi)
+
+pdf/
+
+# --- Assets Grafici ---
+
+# Gli SVG e le immagini caricate (es. Sleeping-Kitty.svg) occupano molti token
+
+frontend/public/_.svg
+frontend/public/_.jpg
+frontend/public/_.png
+frontend/public/_.ico
+
+# --- File di Lock ---
+
+# Sono file generati automaticamente e lunghissimi, non servono per capire la logica
+
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# --- Build e Cache ---
+
+dist/
+build/
+.cache/
+**pycache**/
+\*.pyc
+
+# --- Database e File Binari ---
+
+# Il database SQLite è binario e Repomix lo salterebbe, ma meglio essere espliciti
+
+_.db
+_.sqlite3
+
+# --- Segreti e Config locali ---
+
+.env
+.env.\*
