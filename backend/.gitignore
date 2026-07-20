@@ -1,3 +1,4 @@
+# backend/.gitignore
 # MyTrainUp Backend: Regole di Ignorazione dei File (Git Ignore)
 
 # Questo file (.gitignore) istruisce il sistema di controllo versione Git su quali file e directory ignorare e non tracciare all'interno del repository del progetto.
