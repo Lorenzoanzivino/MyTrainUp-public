@@ -188,3 +188,16 @@ Password: cliente123
 - **REST invece di WebSocket**: Il dominio non richiede real-time hard. REST semplifica il debugging e la scalabilità iniziale.
 
 - **JSON nel database**: Permette flessibilità estrema per tecniche di allenamento avanzate senza dover eseguire migrazioni relazionali continue.
+
+---
+
+## 📄 Licenza
+
+Copyright © 2026 Lorenzo Anzivino
+
+All rights reserved.
+
+Il codice è disponibile pubblicamente solo a scopo
+di consultazione. Non è consentito modificare,
+ridistribuire o utilizzare commercialmente il software
+senza autorizzazione.
